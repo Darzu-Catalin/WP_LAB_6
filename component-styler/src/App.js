@@ -7,6 +7,7 @@ import './App.css';
 
 function App() {
   const [components, setComponents] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
   const [draggedPaletteType, setDraggedPaletteType] = useState(null);
 
   const sensors = useSensors(
@@ -38,6 +39,7 @@ function App() {
         styles: { ...DEFAULT_STYLES },
       };
       setComponents(prev => [...prev, newComp]);
+      setSelectedId(newComp.id);
       return;
     }
 
@@ -61,11 +63,16 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">🎨 Component Styler</h1>
+        {selectedId && <span className="selection-info">Component selected — style editor coming next</span>}
       </header>
       <div className="app-workspace">
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <ComponentPalette />
-          <Canvas components={components} selectedId={null} onSelectComponent={() => {}} />
+          <Canvas
+            components={components}
+            selectedId={selectedId}
+            onSelectComponent={setSelectedId}
+          />
           <DragOverlay>
             {paletteTypeInfo ? (
               <div className="drag-overlay-item">
