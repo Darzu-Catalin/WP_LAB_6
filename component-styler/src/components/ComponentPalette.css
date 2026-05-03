@@ -1,0 +1,67 @@
+.component-palette {
+  width: 160px;
+  min-width: 160px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.palette-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 2px 0;
+}
+
+.palette-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0 0 12px 0;
+}
+
+.palette-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: grab;
+  background: var(--palette-item-bg);
+  border: 1px solid var(--border);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  user-select: none;
+}
+
+.palette-item:hover {
+  background: var(--palette-item-hover);
+  box-shadow: 0 2px 8px var(--shadow);
+  transform: translateY(-1px);
+}
+
+.palette-item.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.palette-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.palette-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
