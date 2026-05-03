@@ -1,0 +1,10 @@
+.editor-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+.editor-page .app-workspace {
+  height: 100%;
+}

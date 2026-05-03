@@ -2,11 +2,29 @@
   flex: 1;
   position: relative;
   background: var(--canvas-bg);
-  background-image:
-    radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
-  background-size: 24px 24px;
   overflow: hidden;
   transition: background 0.2s;
+}
+
+/* Background variants */
+.canvas-bg-dots {
+  background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.canvas-bg-grid {
+  background-image:
+    linear-gradient(var(--canvas-dot) 1px, transparent 1px),
+    linear-gradient(90deg, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.canvas-bg-plain {
+  background-image: none;
+}
+
+.canvas-bg-custom {
+  background-image: none;
 }
 
 .canvas.drop-over {

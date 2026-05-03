@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React from 'react';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import CanvasComponent from './CanvasComponent';
 import './Canvas.css';
@@ -31,13 +31,16 @@ function DraggableCanvasComponent({ component, isSelected, onClick }) {
   );
 }
 
-export default function Canvas({ components, selectedId, onSelectComponent, onDropFromPalette }) {
+export default function Canvas({ components, selectedId, onSelectComponent, onDropFromPalette, canvasBg = 'dots', customBg = '#f0f3fa' }) {
   const { setNodeRef, isOver } = useDroppable({ id: 'canvas' });
+
+  const bgStyle = canvasBg === 'custom' ? { backgroundColor: customBg, backgroundImage: 'none' } : {};
 
   return (
     <main
       ref={setNodeRef}
-      className={`canvas${isOver ? ' drop-over' : ''}${components.length === 0 ? ' empty' : ''}`}
+      className={`canvas canvas-bg-${canvasBg}${isOver ? ' drop-over' : ''}${components.length === 0 ? ' empty' : ''}`}
+      style={bgStyle}
       onClick={() => onSelectComponent(null)}
     >
       {components.length === 0 && (

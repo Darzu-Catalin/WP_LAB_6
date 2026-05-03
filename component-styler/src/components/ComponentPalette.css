@@ -38,7 +38,7 @@
   padding: 8px 10px;
   border-radius: 8px;
   cursor: grab;
-  background: var(--palette-item-bg);
+  background: var(--palette-item);
   border: 1px solid var(--border);
   transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
   user-select: none;
