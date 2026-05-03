@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { DEFAULT_STYLES, COMPONENT_TYPES, generateId } from './utils/componentUtils';
+import { useLocalStorage } from './hooks/useLocalStorage';
 import ComponentPalette from './components/ComponentPalette';
 import Canvas from './components/Canvas';
 import StyleEditor from './components/StyleEditor';
@@ -9,6 +10,7 @@ import './App.css';
 function App() {
   const [components, setComponents] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [configs, setConfigs] = useLocalStorage('component-styler-configs', []);
   const [draggedPaletteType, setDraggedPaletteType] = useState(null);
 
   const sensors = useSensors(
@@ -56,12 +58,26 @@ function App() {
     setSelectedId(prev => prev === id ? null : prev);
   }, []);
 
+  const handleSaveConfig = useCallback((name) => {
+    const newConfig = {
+      id: generateId(),
+      name,
+      components: JSON.parse(JSON.stringify(components)),
+      savedAt: new Date().toISOString(),
+    };
+    setConfigs(prev => [newConfig, ...prev]);
+  }, [components, setConfigs]);
+
   const paletteTypeInfo = draggedPaletteType ? COMPONENT_TYPES.find(c => c.type === draggedPaletteType) : null;
 
   return (
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">🎨 Component Styler</h1>
+        <button className="save-quick-btn" onClick={() => handleSaveConfig(`Config ${configs.length + 1}`)} disabled={components.length === 0}>
+          💾 Save Config
+        </button>
+        <span className="saved-count">{configs.length} saved</span>
       </header>
       <div className="app-workspace">
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
