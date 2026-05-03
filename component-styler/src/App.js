@@ -2,13 +2,14 @@ import React, { useState, useCallback } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { DEFAULT_STYLES, COMPONENT_TYPES, generateId } from './utils/componentUtils';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { ThemeProvider } from './context/ThemeContext';
 import ComponentPalette from './components/ComponentPalette';
 import Canvas from './components/Canvas';
 import StyleEditor from './components/StyleEditor';
 import Toolbar from './components/Toolbar';
 import './App.css';
 
-function App() {
+function AppContent() {
   const [components, setComponents] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [configs, setConfigs] = useLocalStorage('component-styler-configs', []);
@@ -114,4 +115,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}

@@ -1,7 +1,64 @@
-* { box-sizing: border-box; }
-body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; }
-.app { display: flex; flex-direction: column; height: 100vh; }
-.app-header { background: #4f46e5; color: white; padding: 14px 20px; }
-.app-title { margin: 0; font-size: 20px; font-weight: 700; }
-.app-workspace { flex: 1; display: flex; overflow: hidden; }
-.canvas-placeholder { flex: 1; display: flex; align-items: center; justify-content: center; color: #888; font-size: 15px; }
+/* ===== Light Theme ===== */
+:root,
+[data-theme='light'] {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface-hover: #f8f9fa;
+  --border: #e2e8f0;
+  --text: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #a0aec0;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-light: #818cf8;
+  --accent-light-bg: #eef2ff;
+  --accent-glow: rgba(79, 70, 229, 0.2);
+  --canvas-bg: #f7f8fc;
+  --canvas-dot: #cbd5e0;
+  --canvas-drop-over: #eef2ff;
+  --palette-item-bg: #f8fafc;
+  --palette-item-hover: #eef2ff;
+  --btn-bg: #f8fafc;
+  --btn-hover: #eef2ff;
+  --input-bg: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.06);
+  --shadow-lg: rgba(0, 0, 0, 0.12);
+  --danger: #e53e3e;
+  --danger-bg: #fff5f5;
+}
+
+/* ===== Dark Theme ===== */
+[data-theme='dark'] {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface-hover: #222535;
+  --border: #2d3148;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-light: #818cf8;
+  --accent-light-bg: #1e1f3a;
+  --accent-glow: rgba(99, 102, 241, 0.25);
+  --canvas-bg: #13151f;
+  --canvas-dot: #2d3148;
+  --canvas-drop-over: #1e1f3a;
+  --palette-item-bg: #222535;
+  --palette-item-hover: #2a2d44;
+  --btn-bg: #222535;
+  --btn-hover: #2a2d44;
+  --input-bg: #222535;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.5);
+  --danger: #fc8181;
+  --danger-bg: #2d1a1a;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
