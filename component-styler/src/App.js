@@ -5,6 +5,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import ComponentPalette from './components/ComponentPalette';
 import Canvas from './components/Canvas';
 import StyleEditor from './components/StyleEditor';
+import Toolbar from './components/Toolbar';
 import './App.css';
 
 function App() {
@@ -68,17 +69,35 @@ function App() {
     setConfigs(prev => [newConfig, ...prev]);
   }, [components, setConfigs]);
 
+  const handleLoadConfig = useCallback((config) => {
+    if (components.length > 0 && !window.confirm('This will replace the current canvas. Continue?')) return;
+    setComponents(JSON.parse(JSON.stringify(config.components)));
+    setSelectedId(null);
+  }, [components]);
+
+  const handleDeleteConfig = useCallback((id) => {
+    setConfigs(prev => prev.filter(c => c.id !== id));
+  }, [setConfigs]);
+
+  const handleClearCanvas = useCallback(() => {
+    if (window.confirm('Clear all components from the canvas?')) {
+      setComponents([]);
+      setSelectedId(null);
+    }
+  }, []);
+
   const paletteTypeInfo = draggedPaletteType ? COMPONENT_TYPES.find(c => c.type === draggedPaletteType) : null;
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1 className="app-title">🎨 Component Styler</h1>
-        <button className="save-quick-btn" onClick={() => handleSaveConfig(`Config ${configs.length + 1}`)} disabled={components.length === 0}>
-          💾 Save Config
-        </button>
-        <span className="saved-count">{configs.length} saved</span>
-      </header>
+      <Toolbar
+        components={components}
+        configs={configs}
+        onSaveConfig={handleSaveConfig}
+        onLoadConfig={handleLoadConfig}
+        onDeleteConfig={handleDeleteConfig}
+        onClearCanvas={handleClearCanvas}
+      />
       <div className="app-workspace">
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <ComponentPalette />
