@@ -125,6 +125,63 @@ export default function StyleEditor({ component, onStyleChange, onDelete }) {
             values={{ top: styles.marginTop, right: styles.marginRight, bottom: styles.marginBottom, left: styles.marginLeft }}
             onChange={(side, v) => update(`margin${side.charAt(0).toUpperCase() + side.slice(1)}`, v)} />
         </section>
+
+        <section className="editor-section">
+          <h4 className="section-title">Border</h4>
+          <NumberInput label="Width" value={styles.borderWidth} onChange={v => update('borderWidth', v)} unit="px" />
+          <NumberInput label="Radius" value={styles.borderRadius} onChange={v => update('borderRadius', v)} unit="px" />
+          <SelectInput label="Style" value={styles.borderStyle} onChange={v => update('borderStyle', v)}
+            options={[
+              { value: 'none', label: 'None' },
+              { value: 'solid', label: 'Solid' },
+              { value: 'dashed', label: 'Dashed' },
+              { value: 'dotted', label: 'Dotted' },
+              { value: 'double', label: 'Double' },
+            ]} />
+        </section>
+
+        <section className="editor-section">
+          <h4 className="section-title">Sizing</h4>
+          <div className="style-row">
+            <label className="style-label">Width</label>
+            <div className="sizing-wrap">
+              <input type="text" value={styles.width || 'auto'} onChange={e => update('width', e.target.value)} className="sizing-input" placeholder="auto" />
+              <select value={styles.widthUnit || 'px'} onChange={e => update('widthUnit', e.target.value)} className="unit-select">
+                <option value="px">px</option><option value="%">%</option><option value="auto">auto</option>
+              </select>
+            </div>
+          </div>
+          <div className="style-row">
+            <label className="style-label">Height</label>
+            <div className="sizing-wrap">
+              <input type="text" value={styles.height || 'auto'} onChange={e => update('height', e.target.value)} className="sizing-input" placeholder="auto" />
+              <select value={styles.heightUnit || 'px'} onChange={e => update('heightUnit', e.target.value)} className="unit-select">
+                <option value="px">px</option><option value="%">%</option><option value="auto">auto</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section className="editor-section">
+          <h4 className="section-title">Effects</h4>
+          <SelectInput label="Box Shadow" value={styles.boxShadow} onChange={v => update('boxShadow', v)}
+            options={[
+              { value: 'none', label: 'None' },
+              { value: '0 1px 3px rgba(0,0,0,0.12)', label: 'Small' },
+              { value: '0 4px 6px rgba(0,0,0,0.1)', label: 'Medium' },
+              { value: '0 10px 15px rgba(0,0,0,0.1)', label: 'Large' },
+              { value: '0 20px 25px rgba(0,0,0,0.15)', label: 'X-Large' },
+              { value: 'inset 0 2px 4px rgba(0,0,0,0.06)', label: 'Inner' },
+            ]} />
+          <div className="style-row">
+            <label className="style-label">Opacity</label>
+            <div className="opacity-wrap">
+              <input type="range" min="0" max="1" step="0.05" value={styles.opacity || 1}
+                onChange={e => update('opacity', e.target.value)} className="range-input" />
+              <span className="opacity-value">{Math.round((styles.opacity || 1) * 100)}%</span>
+            </div>
+          </div>
+        </section>
       </div>
     </aside>
   );
