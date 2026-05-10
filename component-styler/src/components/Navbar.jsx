@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Layers, Moon, Sun, LayoutTemplate, BookOpen, Pencil } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import './Navbar.css';
 
 const navItems = [
   { to: '/', label: 'Home', icon: LayoutTemplate, exact: true },

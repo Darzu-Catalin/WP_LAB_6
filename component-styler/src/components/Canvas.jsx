@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
-import CanvasComponent from './CanvasComponent';
-import './Canvas.css';
+import CanvasComponent from './CanvasComponent.jsx';
 
 function DraggableCanvasComponent({ component, isSelected, onClick }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({

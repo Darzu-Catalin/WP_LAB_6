@@ -1,5 +1,4 @@
 import React from 'react';
-import './StyleEditor.css';
 
 function NumberInput({ label, value, onChange, unit, min = 0 }) {
   return (

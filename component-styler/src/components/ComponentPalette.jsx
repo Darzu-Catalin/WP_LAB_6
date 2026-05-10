@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { COMPONENT_TYPES } from '../utils/componentUtils';
-import './ComponentPalette.css';
 
 function PaletteItem({ type, label, icon }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({

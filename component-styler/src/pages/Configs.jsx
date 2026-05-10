@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Trash2, FolderOpen, LayoutGrid, Clock, Layers, Plus } from 'lucide-react';
-import './Configs.css';
 
 export default function Configs({ configs, onLoad, onDelete }) {
   const [search, setSearch] = useState('');
@@ -20,7 +19,7 @@ export default function Configs({ configs, onLoad, onDelete }) {
     <div className="configs-page">
       {/* Page header */}
       <div className="configs-header">
-        <div>
+        <div className="configs-heading-block">
           <h1 className="configs-title">Saved Configurations</h1>
           <p className="configs-sub">
             {configs.length === 0

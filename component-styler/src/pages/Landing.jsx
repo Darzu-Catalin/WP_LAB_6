@@ -10,7 +10,6 @@ import {
   ArrowRight,
   CheckCircle2,
 } from 'lucide-react';
-import './Landing.css';
 
 const features = [
   {

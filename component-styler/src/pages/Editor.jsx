@@ -7,11 +7,10 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { DEFAULT_STYLES, COMPONENT_TYPES, generateId } from '../utils/componentUtils';
-import ComponentPalette from '../components/ComponentPalette';
-import Canvas from '../components/Canvas';
-import StyleEditor from '../components/StyleEditor';
-import EditorToolbar from '../components/EditorToolbar';
-import './Editor.css';
+import ComponentPalette from '../components/ComponentPalette.jsx';
+import Canvas from '../components/Canvas.jsx';
+import StyleEditor from '../components/StyleEditor.jsx';
+import EditorToolbar from '../components/EditorToolbar.jsx';
 
 export default function Editor({ configs, onSaveConfig, onDeleteConfig, pendingLoad, onClearPendingLoad }) {
   const [components, setComponents] = useState([]);

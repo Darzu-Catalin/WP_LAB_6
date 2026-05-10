@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Save, FolderOpen, Trash2, ChevronDown, LayoutTemplate, Search, X, CheckCircle2 } from 'lucide-react';
-import './EditorToolbar.css';
 
 function SavePanel({ configs, onSave, onLoad, onDelete }) {
   const [open, setOpen] = useState(false);
