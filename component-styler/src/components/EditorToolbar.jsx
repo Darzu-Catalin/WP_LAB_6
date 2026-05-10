@@ -1,12 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Save, FolderOpen, Trash2, ChevronDown, LayoutTemplate, Search, X, CheckCircle2 } from 'lucide-react';
+import { getConfigurations, deleteConfiguration } from '../services/configService';
 
-function SavePanel({ configs, onSave, onLoad, onDelete }) {
+function SavePanel({ configs: propConfigs, onSave, onLoad, onDelete }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [search, setSearch] = useState('');
   const [saved, setSaved] = useState(false);
+  const [configs, setConfigs] = useState([]);
+  const [loading, setLoading] = useState(false);
   const ref = useRef();
+
+  // Load configurations from API when dropdown opens
+  useEffect(() => {
+    if (open) {
+      loadConfigs();
+    }
+  }, [open]);
+
+  const loadConfigs = async () => {
+    try {
+      setLoading(true);
+      const data = await getConfigurations();
+      setConfigs(data);
+    } catch (error) {
+      console.error('Failed to load configurations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handler = (e) => {
@@ -22,6 +44,18 @@ function SavePanel({ configs, onSave, onLoad, onDelete }) {
     setName('');
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+    // Reload configs after save
+    loadConfigs();
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteConfiguration(id);
+      setConfigs(configs.filter(c => c.id !== id));
+      onDelete(id);
+    } catch (error) {
+      console.error('Failed to delete configuration:', error);
+    }
   };
 
   const filtered = configs.filter(c =>
@@ -54,7 +88,7 @@ function SavePanel({ configs, onSave, onLoad, onDelete }) {
               <button
                 className={`save-submit-btn${saved ? ' saved' : ''}`}
                 onClick={handleSave}
-                disabled={!name.trim()}
+                disabled={!name.trim() || loading}
               >
                 {saved ? <CheckCircle2 size={15} strokeWidth={2} /> : <Save size={14} strokeWidth={2.5} />}
                 {saved ? 'Saved' : 'Save'}
@@ -81,35 +115,38 @@ function SavePanel({ configs, onSave, onLoad, onDelete }) {
                 )}
               </div>
               <div className="configs-list">
-                {filtered.length === 0 && (
+                {loading ? (
+                  <div className="configs-list-empty">Loading...</div>
+                ) : filtered.length === 0 ? (
                   <div className="configs-list-empty">No results found</div>
+                ) : (
+                  filtered.map(config => (
+                    <div key={config.id} className="configs-list-item">
+                      <div className="configs-list-info">
+                        <span className="configs-list-name">{config.name}</span>
+                        <span className="configs-list-meta">
+                          {config.components.length} component{config.components.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="configs-list-actions">
+                        <button
+                          className="config-action-btn load"
+                          onClick={() => { onLoad(config); setOpen(false); }}
+                          title="Load"
+                        >
+                          <FolderOpen size={13} strokeWidth={2} />
+                        </button>
+                        <button
+                          className="config-action-btn delete"
+                          onClick={() => handleDelete(config.id)}
+                          title="Delete"
+                        >
+                          <Trash2 size={13} strokeWidth={2} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
                 )}
-                {filtered.map(config => (
-                  <div key={config.id} className="configs-list-item">
-                    <div className="configs-list-info">
-                      <span className="configs-list-name">{config.name}</span>
-                      <span className="configs-list-meta">
-                        {config.components.length} component{config.components.length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    <div className="configs-list-actions">
-                      <button
-                        className="config-action-btn load"
-                        onClick={() => { onLoad(config); setOpen(false); }}
-                        title="Load"
-                      >
-                        <FolderOpen size={13} strokeWidth={2} />
-                      </button>
-                      <button
-                        className="config-action-btn delete"
-                        onClick={() => onDelete(config.id)}
-                        title="Delete"
-                      >
-                        <Trash2 size={13} strokeWidth={2} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           )}

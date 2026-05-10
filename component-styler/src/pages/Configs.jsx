@@ -1,10 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Trash2, FolderOpen, LayoutGrid, Clock, Layers, Plus } from 'lucide-react';
+import { Search, Trash2, FolderOpen, LayoutGrid, Clock, Layers, Plus, AlertCircle } from 'lucide-react';
+import { getConfigurations, deleteConfiguration } from '../services/configService';
 
-export default function Configs({ configs, onLoad, onDelete }) {
+export default function Configs({ configs: propConfigs, onLoad, onDelete }) {
   const [search, setSearch] = useState('');
+  const [configs, setConfigs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  // Load configurations from API on mount
+  useEffect(() => {
+    const loadConfigs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getConfigurations();
+        setConfigs(data);
+        // COMMENTED OUT: localStorage approach
+        // const savedConfigs = localStorage.getItem('component-configs');
+        // setConfigs(savedConfigs ? JSON.parse(savedConfigs) : []);
+      } catch (err) {
+        console.error('Failed to load configurations:', err);
+        setError(err.message);
+        // COMMENTED OUT: Fallback to localStorage if API fails
+        // const savedConfigs = localStorage.getItem('component-configs');
+        // setConfigs(savedConfigs ? JSON.parse(savedConfigs) : []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadConfigs();
+  }, []);
 
   const filtered = configs.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase())
@@ -15,8 +44,50 @@ export default function Configs({ configs, onLoad, onDelete }) {
     navigate('/editor');
   };
 
+  const handleDelete = async (id) => {
+    try {
+      await deleteConfiguration(id);
+      setConfigs(configs.filter(c => c.id !== id));
+      // COMMENTED OUT: localStorage approach
+      // const updated = configs.filter(c => c.id !== id);
+      // setConfigs(updated);
+      // localStorage.setItem('component-configs', JSON.stringify(updated));
+      // onDelete(id);
+    } catch (err) {
+      console.error('Failed to delete configuration:', err);
+      setError(`Failed to delete configuration: ${err.message}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="configs-page">
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+          <p>Loading configurations...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="configs-page">
+      {/* Error message */}
+      {error && (
+        <div style={{
+          padding: '12px 16px',
+          background: 'var(--red-faint)',
+          border: '1px solid var(--red)',
+          borderRadius: 'var(--radius)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          color: 'var(--red)',
+          marginBottom: '20px',
+        }}>
+          <AlertCircle size={16} />
+          <span>{error}</span>
+        </div>
+      )}
       {/* Page header */}
       <div className="configs-header">
         <div className="configs-heading-block">
@@ -106,7 +177,7 @@ export default function Configs({ configs, onLoad, onDelete }) {
                 </button>
                 <button
                   className="config-delete-btn"
-                  onClick={() => onDelete(config.id)}
+                  onClick={() => handleDelete(config.id)}
                   title="Delete configuration"
                 >
                   <Trash2 size={14} strokeWidth={2} />

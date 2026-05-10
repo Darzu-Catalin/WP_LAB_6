@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Layers, Moon, Sun, LayoutTemplate, BookOpen, Pencil } from 'lucide-react';
+import { Layers, Moon, Sun, LayoutTemplate, BookOpen, Pencil, LogOut } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const navItems = [
@@ -9,7 +9,7 @@ const navItems = [
   { to: '/configs', label: 'Saved Configs', icon: BookOpen },
 ];
 
-export default function Navbar() {
+export default function Navbar({ user, onLogout }) {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
@@ -39,6 +39,35 @@ export default function Navbar() {
       </div>
 
       <div className="navbar-actions">
+        {user && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}>
+            <span style={{
+              fontSize: '13px',
+              color: 'var(--text-secondary)',
+              whiteSpace: 'nowrap',
+            }}>
+              {user.username}
+            </span>
+            <button
+              onClick={onLogout}
+              className="theme-btn"
+              title="Logout"
+              aria-label="Logout"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <LogOut size={16} strokeWidth={2} />
+            </button>
+          </div>
+        )}
+        
         <button
           className="theme-btn"
           onClick={toggleTheme}
