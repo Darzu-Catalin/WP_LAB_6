@@ -120,7 +120,17 @@ function issueToken(req, res) {
   }
 
   const permissions = getPermissionsForRole(role);
-  const payload = { role, permissions };
+  // Demo tokens get a synthetic userId so CRUD endpoints work without registering;
+  // all sessions sharing a role share the same demo user — useful for showing the
+  // permission system without seeding accounts.
+  const demoUserId = `demo-${role.toLowerCase()}`;
+  const payload = {
+    userId: demoUserId,
+    username: demoUserId,
+    role,
+    permissions,
+    demo: true,
+  };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
 
   return res.json({
@@ -128,6 +138,42 @@ function issueToken(req, res) {
     expiresIn: JWT_EXPIRATION,
     role,
     permissions,
+    user: { id: demoUserId, username: demoUserId, role },
+  });
+}
+
+function switchRole(req, res) {
+  const role = req.body.role;
+  const validRoles = ['ADMIN', 'WRITER', 'VISITOR'];
+
+  if (!role || !validRoles.includes(role)) {
+    return res.status(400).json({
+      error: `Invalid role. Must be one of: ${validRoles.join(', ')}`,
+    });
+  }
+
+  // Re-issue a JWT for the SAME authenticated user but with a different role.
+  // Lets the user demonstrate permission gates against their own data without
+  // logging out / creating new accounts. Demo-mode only.
+  const payload = {
+    userId: req.user.userId,
+    username: req.user.username,
+    role,
+    permissions: getPermissionsForRole(role),
+    demo: req.user.demo === true,
+  };
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
+
+  return res.json({
+    token,
+    expiresIn: JWT_EXPIRATION,
+    role,
+    permissions: payload.permissions,
+    user: {
+      id: req.user.userId,
+      username: req.user.username,
+      role,
+    },
   });
 }
 
@@ -152,5 +198,6 @@ module.exports = {
   register,
   login,
   issueToken,
+  switchRole,
   me,
 };

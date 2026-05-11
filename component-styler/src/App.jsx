@@ -3,12 +3,20 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 // import { useLocalStorage } from './hooks/useLocalStorage';
 import { generateId } from './utils/componentUtils';
-import { createConfiguration, isAuthenticated, getStoredUser } from './services/configService';
+import {
+  createConfiguration,
+  isAuthenticated,
+  getStoredUser,
+  onAuthChange,
+  getTokenRemainingMs,
+  logoutUser,
+} from './services/configService';
 import Navbar from './components/Navbar.jsx';
 import Landing from './pages/Landing.jsx';
 import Editor from './pages/Editor.jsx';
 import Configs from './pages/Configs.jsx';
 import Auth from './pages/Auth.jsx';
+import Permissions from './pages/Permissions.jsx';
 import { GLOBAL_STYLES } from './styles/globalStyles.jsx';
 
 function ProtectedLayout({ children, user, onLogout }) {
@@ -28,15 +36,25 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  // Check authentication on mount
+  // Check authentication on mount and stay in sync with token changes
+  // (login, demo token, role switch, logout, expiry).
   useEffect(() => {
-    const authenticated = isAuthenticated();
-    setIsAuth(authenticated);
-    if (authenticated) {
-      const storedUser = getStoredUser();
-      setUser(storedUser);
-    }
+    const refresh = () => {
+      const authenticated = isAuthenticated();
+      setIsAuth(authenticated);
+      setUser(authenticated ? getStoredUser() : null);
+    };
+    refresh();
     setAuthLoading(false);
+    const unsub = onAuthChange(refresh);
+    // Poll for expiry — when the JWT TTL elapses, force logout so the UI
+    // visibly reacts to expiration (assignment requires 1-minute tokens).
+    const interval = setInterval(() => {
+      if (sessionStorage.getItem('app-jwt-token') && getTokenRemainingMs() <= 0) {
+        logoutUser();
+      }
+    }, 1000);
+    return () => { unsub(); clearInterval(interval); };
   }, []);
 
   const handleSaveConfig = async (name, components) => {
@@ -73,11 +91,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('app-jwt-token');
-    sessionStorage.removeItem('app-jwt-expiry');
-    sessionStorage.removeItem('app-user');
-    setIsAuth(false);
-    setUser(null);
+    logoutUser();
   };
 
   const handleAuthSuccess = (userData) => {
@@ -142,6 +156,14 @@ export default function App() {
                     onLoad={handleLoadConfig}
                     onDelete={handleDeleteConfig}
                   />
+                </ProtectedLayout>
+              }
+            />
+            <Route
+              path="/permissions"
+              element={
+                <ProtectedLayout user={user} onLogout={handleLogout}>
+                  <Permissions />
                 </ProtectedLayout>
               }
             />

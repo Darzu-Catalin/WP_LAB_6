@@ -16,6 +16,12 @@ function authenticateToken(req, res, next) {
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
 
+    // Demo tokens (issued by /token) carry a synthetic userId — no real user record.
+    if (decoded.demo) {
+      req.user = { ...decoded };
+      return next();
+    }
+
     const user = getUsers().find((u) => u.id === decoded.userId);
     if (!user) {
       return res.status(403).json({ error: 'User not found' });

@@ -48,6 +48,6 @@ router.post('/configs', authenticateToken, checkPermission('WRITE'), createConfi
  */
 router.get('/configs/:id', authenticateToken, checkPermission('READ'), getConfigById);
 router.put('/configs/:id', authenticateToken, checkPermission('WRITE'), updateConfig);
-router.delete('/configs/:id', authenticateToken, checkPermission('WRITE'), deleteConfig);
+router.delete('/configs/:id', authenticateToken, checkPermission('DELETE'), deleteConfig);
 
 module.exports = router;

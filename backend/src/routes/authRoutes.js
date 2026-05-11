@@ -3,6 +3,7 @@ const {
   register,
   login,
   issueToken,
+  switchRole,
   me,
 } = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
@@ -39,6 +40,27 @@ router.post('/login', login);
  */
 router.post('/token', issueToken);
 router.get('/token', issueToken);
+
+/**
+ * @swagger
+ * /demo/switch-role:
+ *   post:
+ *     summary: Re-issue a JWT for the current user with a different role (demo only)
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [ADMIN, WRITER, VISITOR]
+ */
+router.post('/demo/switch-role', authenticateToken, switchRole);
 
 /**
  * @swagger

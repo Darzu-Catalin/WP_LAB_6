@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Save, FolderOpen, Trash2, ChevronDown, LayoutTemplate, Search, X, CheckCircle2 } from 'lucide-react';
-import { getConfigurations, deleteConfiguration } from '../services/configService';
+import { Save, FolderOpen, Trash2, ChevronDown, LayoutTemplate, Search, X, CheckCircle2, Lock } from 'lucide-react';
+import {
+  getConfigurations,
+  deleteConfiguration,
+  hasPermission,
+  onAuthChange,
+} from '../services/configService';
 
 function SavePanel({ configs: propConfigs, onSave, onLoad, onDelete }) {
   const [open, setOpen] = useState(false);
@@ -9,7 +14,12 @@ function SavePanel({ configs: propConfigs, onSave, onLoad, onDelete }) {
   const [saved, setSaved] = useState(false);
   const [configs, setConfigs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [, setTick] = useState(0);
   const ref = useRef();
+
+  useEffect(() => onAuthChange(() => setTick((n) => n + 1)), []);
+  const canWrite = hasPermission('WRITE');
+  const canDelete = hasPermission('DELETE');
 
   // Load configurations from API when dropdown opens
   useEffect(() => {
@@ -39,7 +49,7 @@ function SavePanel({ configs: propConfigs, onSave, onLoad, onDelete }) {
   }, []);
 
   const handleSave = () => {
-    if (!name.trim()) return;
+    if (!name.trim() || !canWrite) return;
     onSave(name.trim());
     setName('');
     setSaved(true);
@@ -73,22 +83,40 @@ function SavePanel({ configs: propConfigs, onSave, onLoad, onDelete }) {
 
       {open && (
         <div className="save-dropdown">
+          {!canWrite && (
+            <div style={{
+              padding: '8px 12px',
+              margin: '8px',
+              background: 'var(--red-faint)',
+              border: '1px solid var(--red)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--red)',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}>
+              <Lock size={12} /> Your role does not have WRITE permission — saving is disabled.
+            </div>
+          )}
           <div className="save-dropdown-section">
             <p className="dropdown-label">Save current canvas</p>
             <div className="save-input-row">
               <input
                 type="text"
-                placeholder="Configuration name..."
+                placeholder={canWrite ? 'Configuration name...' : 'No WRITE permission'}
                 value={name}
                 onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSave()}
                 className="save-name-input"
+                disabled={!canWrite}
                 autoFocus
               />
               <button
                 className={`save-submit-btn${saved ? ' saved' : ''}`}
                 onClick={handleSave}
-                disabled={!name.trim() || loading}
+                disabled={!name.trim() || loading || !canWrite}
+                title={!canWrite ? 'Requires WRITE permission' : ''}
               >
                 {saved ? <CheckCircle2 size={15} strokeWidth={2} /> : <Save size={14} strokeWidth={2.5} />}
                 {saved ? 'Saved' : 'Save'}
@@ -139,7 +167,9 @@ function SavePanel({ configs: propConfigs, onSave, onLoad, onDelete }) {
                         <button
                           className="config-action-btn delete"
                           onClick={() => handleDelete(config.id)}
-                          title="Delete"
+                          disabled={!canDelete}
+                          title={canDelete ? 'Delete' : 'Requires DELETE permission (ADMIN only)'}
+                          style={!canDelete ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
                         >
                           <Trash2 size={13} strokeWidth={2} />
                         </button>

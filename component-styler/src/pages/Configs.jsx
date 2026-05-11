@@ -1,39 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Trash2, FolderOpen, LayoutGrid, Clock, Layers, Plus, AlertCircle } from 'lucide-react';
-import { getConfigurations, deleteConfiguration } from '../services/configService';
+import { Search, Trash2, FolderOpen, LayoutGrid, Clock, Layers, Plus, AlertCircle, ShieldAlert } from 'lucide-react';
+import {
+  getConfigurations,
+  deleteConfiguration,
+  hasPermission,
+  getRole,
+  onAuthChange,
+} from '../services/configService';
 
 export default function Configs({ configs: propConfigs, onLoad, onDelete }) {
   const [search, setSearch] = useState('');
   const [configs, setConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [, setTick] = useState(0);
   const navigate = useNavigate();
 
-  // Load configurations from API on mount
-  useEffect(() => {
-    const loadConfigs = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getConfigurations();
-        setConfigs(data);
-        // COMMENTED OUT: localStorage approach
-        // const savedConfigs = localStorage.getItem('component-configs');
-        // setConfigs(savedConfigs ? JSON.parse(savedConfigs) : []);
-      } catch (err) {
-        console.error('Failed to load configurations:', err);
-        setError(err.message);
-        // COMMENTED OUT: Fallback to localStorage if API fails
-        // const savedConfigs = localStorage.getItem('component-configs');
-        // setConfigs(savedConfigs ? JSON.parse(savedConfigs) : []);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadConfigs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getConfigurations();
+      setConfigs(data);
+      // COMMENTED OUT: localStorage approach
+      // const savedConfigs = localStorage.getItem('component-configs');
+      // setConfigs(savedConfigs ? JSON.parse(savedConfigs) : []);
+    } catch (err) {
+      console.error('Failed to load configurations:', err);
+      setError(err.message);
+      // COMMENTED OUT: Fallback to localStorage if API fails
+      // const savedConfigs = localStorage.getItem('component-configs');
+      // setConfigs(savedConfigs ? JSON.parse(savedConfigs) : []);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Initial load + reload whenever the JWT/role changes (e.g. role switch
+  // means a different demo identity sees a different set of configs).
+  useEffect(() => {
     loadConfigs();
+    const unsub = onAuthChange(() => { setTick((n) => n + 1); loadConfigs(); });
+    return () => unsub();
   }, []);
+
+  const role = getRole();
+  const canDelete = hasPermission('DELETE');
+  const canWrite = hasPermission('WRITE');
 
   const filtered = configs.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase())
@@ -55,7 +69,9 @@ export default function Configs({ configs: propConfigs, onLoad, onDelete }) {
       // onDelete(id);
     } catch (err) {
       console.error('Failed to delete configuration:', err);
-      setError(`Failed to delete configuration: ${err.message}`);
+      // Surface the real status from the API — the 403 here is the demo's
+      // money shot: it proves the JWT permission gate is enforced server-side.
+      setError(`${err.message} — your role (${role || 'none'}) lacks DELETE permission.`);
     }
   };
 
@@ -71,6 +87,28 @@ export default function Configs({ configs: propConfigs, onLoad, onDelete }) {
 
   return (
     <div className="configs-page">
+      {/* Permission banner for non-admins */}
+      {role && role !== 'ADMIN' && (
+        <div style={{
+          padding: '10px 14px',
+          background: 'var(--accent-faint)',
+          border: '1px solid var(--accent-border)',
+          borderRadius: 'var(--radius)',
+          color: 'var(--text)',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '13px',
+        }}>
+          <ShieldAlert size={15} style={{ color: 'var(--accent)' }} />
+          <span>
+            Signed in as <strong>{role}</strong>.
+            {canWrite ? ' You can save new configs,' : ' You cannot save configs,'}
+            {canDelete ? ' you can delete any config.' : ' but deletion is reserved for ADMIN.'}
+          </span>
+        </div>
+      )}
       {/* Error message */}
       {error && (
         <div style={{
@@ -178,7 +216,9 @@ export default function Configs({ configs: propConfigs, onLoad, onDelete }) {
                 <button
                   className="config-delete-btn"
                   onClick={() => handleDelete(config.id)}
-                  title="Delete configuration"
+                  disabled={!canDelete}
+                  title={canDelete ? 'Delete configuration' : `Your role (${role || 'none'}) lacks DELETE permission`}
+                  style={!canDelete ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
                 >
                   <Trash2 size={14} strokeWidth={2} />
                 </button>
